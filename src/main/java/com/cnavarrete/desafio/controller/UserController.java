@@ -1,8 +1,10 @@
 package com.cnavarrete.desafio.controller;
 
+import com.cnavarrete.desafio.dto.ErrorResponse;
 import com.cnavarrete.desafio.dto.UserResponseDTO;
 import com.cnavarrete.desafio.models.UserEntity;
 import com.cnavarrete.desafio.service.IUserService;
+import com.cnavarrete.desafio.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +23,23 @@ public class UserController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserEntity user) {
+    public ResponseEntity<?> createUser(@RequestBody UserEntity user) {
         try {
             UserResponseDTO createdUser = userService.createUser(user);
             return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        } catch (UserServiceImpl.InvalidEmailException e) {
+            ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        } catch (UserServiceImpl.EmailAlreadyExistsException e) {
+            ErrorResponse errorResponse = new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error al crear usuario");
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 
     @GetMapping("/get-all")
     public ResponseEntity<List<UserEntity>> getAllUsers() {
@@ -73,3 +84,4 @@ public class UserController {
         }
     }
 }
+

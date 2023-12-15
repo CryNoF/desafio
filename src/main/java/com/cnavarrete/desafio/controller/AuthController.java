@@ -1,14 +1,16 @@
 package com.cnavarrete.desafio.controller;
 
 
+import com.cnavarrete.desafio.dto.ErrorResponse;
 import com.cnavarrete.desafio.dto.UserCredentials;
-import com.cnavarrete.desafio.dto.UserResponseDTO;
 import com.cnavarrete.desafio.models.UserEntity;
 import com.cnavarrete.desafio.repository.UserRepository;
 import com.cnavarrete.desafio.security.CryptoConfig;
 import com.cnavarrete.desafio.security.JWTAuthenticationConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,37 +49,46 @@ public class AuthController {
         return new UserCredentials(userEntity.getEmail(), userEntity.getPassword(), token);
     }
 
-    @PostMapping("login")
-    public Object login(@RequestBody UserCredentials userCredentials) {
-        String mail = userCredentials.getMail();
-        String pass = userCredentials.getPass();
+    @PostMapping("/login")
+    public ResponseEntity<Object> login(@RequestBody UserCredentials userCredentials) {
+        try {
+            String mail = userCredentials.getMail();
+            String pass = userCredentials.getPass();
 
-        if (Objects.equals(defaultAdminMail, mail) && Objects.equals(defaultAdminPassword, pass)) {
-            // Devolver las credenciales del administrador sin crear un nuevo usuario
-            return getDefaultAdminCredentials();
-        }
+            if (Objects.equals(defaultAdminMail, mail) && Objects.equals(defaultAdminPassword, pass)) {
+                // Devolver las credenciales del administrador sin crear un nuevo usuario
+                return ResponseEntity.ok(getDefaultAdminCredentials());
+            }
 
-        // Buscar el usuario por correo
-        Optional<UserEntity> optionalUser = userRepository.findByEmail(mail);
+            // Buscar el usuario por correo
+            Optional<UserEntity> optionalUser = userRepository.findByEmail(mail);
 
-        if (optionalUser.isPresent()) {
-            UserEntity existingUser = optionalUser.get();
+            if (optionalUser.isPresent()) {
+                UserEntity existingUser = optionalUser.get();
 
-            // Verificar la contraseña
-            if (passwordEncoder.matches(pass, existingUser.getPassword())) {
-                // Actualizar la última fecha de inicio de sesión
-                existingUser.setLastLogin(LocalDateTime.now());
-                userRepository.save(existingUser);
+                // Verificar la contraseña
+                if (passwordEncoder.matches(pass, existingUser.getPassword())) {
+                    // Actualizar la última fecha de inicio de sesión
+                    existingUser.setLastLogin(LocalDateTime.now());
+                    userRepository.save(existingUser);
 
-                // Devolver las credenciales del usuario existente
-                return getUserCredentials(existingUser);
+                    // Devolver las credenciales del usuario existente
+                    return ResponseEntity.ok(getUserCredentials(existingUser));
+                } else {
+                    throw new RuntimeException("Usuario o contraseña inválidos");
+                }
             } else {
                 throw new RuntimeException("Usuario o contraseña inválidos");
             }
-        } else {
-            throw new RuntimeException("Usuario o contraseña inválidos");
+        } catch (RuntimeException ex) {
+            // Maneja la excepción y devuelve una respuesta personalizada en formato JSON
+            ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
+
+
+
 }
 
 

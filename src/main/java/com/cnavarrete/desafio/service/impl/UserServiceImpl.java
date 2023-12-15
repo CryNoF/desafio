@@ -47,12 +47,11 @@ public class UserServiceImpl implements IUserService {
             Matcher matcher = pattern.matcher(user.getEmail());
 
             if (!matcher.matches()) {
-                throw new RuntimeException("Correo electrónico no válido");
+                throw new InvalidEmailException("Correo electrónico no válido");
             }
 
-            // Verificación de correo existente
             if (userRepository.existsByEmail(user.getEmail())) {
-                throw new RuntimeException("El correo electrónico ya está registrado");
+                throw new EmailAlreadyExistsException("El correo electrónico ya está registrado");
             }
 
             String passwordEncrypt = passwordEncoder.encode(user.getPassword());
@@ -67,7 +66,7 @@ public class UserServiceImpl implements IUserService {
             user.setActive(true);
 
             UserEntity createdUser = userRepository.save(user);
-            // Mapea la entidad a tu DTO
+            // Mapea la entidad a DTO
             UserResponseDTO responseDTO = new UserResponseDTO();
             responseDTO.setId(createdUser.getId());
             responseDTO.setName(createdUser.getName());
@@ -79,11 +78,27 @@ public class UserServiceImpl implements IUserService {
 
 
             return responseDTO;
+            //Emite evento de las excepciones personalizadas.
+        } catch (InvalidEmailException | EmailAlreadyExistsException e) {
+            throw e;
         } catch (Exception e) {
-            LOGGER.error("Error while creating user: {}", e.getMessage());
-            throw new RuntimeException("Error creating user");
+            LOGGER.error("Error al crear usuario: {}", e.getMessage());
+            throw new RuntimeException("Error creando usuario");
         }
     }
+
+    public class InvalidEmailException extends RuntimeException {
+        public InvalidEmailException(String message) {
+            super(message);
+        }
+    }
+
+    public class EmailAlreadyExistsException extends RuntimeException {
+        public EmailAlreadyExistsException(String message) {
+            super(message);
+        }
+    }
+
 
     @Override
     public List<UserEntity> getAllUsers() {

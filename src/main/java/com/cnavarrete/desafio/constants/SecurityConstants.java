@@ -2,7 +2,6 @@ package com.cnavarrete.desafio.constants;
 
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 

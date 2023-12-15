@@ -102,6 +102,9 @@ se actualizara la fecha de ultimo ingreso.
 
 ● Responder el código de status HTTP adecuado
 
+Se devuelven errores del tipo <img width="553" alt="image" src="https://github.com/CryNoF/desafio/assets/49507741/dfaad596-b02a-405d-a720-6138599dc7a1">
+
+
 ● Si caso el correo conste en la base de datos, deberá retornar un error "El correo ya
 registrado".
 

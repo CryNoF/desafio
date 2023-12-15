@@ -93,11 +93,14 @@ fecha de creación)
 
 <img width="1678" alt="image" src="https://github.com/CryNoF/desafio/assets/49507741/c51419bf-3b67-4cbf-aade-dd9e0dfc867e">
 
-
+Este usuario ya creado servira para poder generar nuevos logins, es decir, las credenciales de mail y password del usuario en DB,
+seran posibles de utilizar para generar sesiones a partir de su propio token y por ende poder utilizar el endpoint de creacion de usuarios
+como lo permitio en un inicio el SuperUser. Esto se puede comprobar tomando el token generado al momento de crear el usuario como llave para 
+los endopints, continuando en operacion bajo el nuevo token. Si el usuario decide generar un login con las credenciales del usuario creado
+se actualizara la fecha de ultimo ingreso.
 
 
 ● Responder el código de status HTTP adecuado
-
 
 ● Si caso el correo conste en la base de datos, deberá retornar un error "El correo ya
 registrado".

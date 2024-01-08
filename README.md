@@ -1,4 +1,4 @@
-Desafio CRUD Neoris
+Desafio CRUD
 
 Camilo Navarrete Portiño:
 
